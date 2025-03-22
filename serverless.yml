@@ -1,18 +1,18 @@
 service: amazon-scraper
 
 provider:
-name: aws
-runtime: nodejs18.x
-region: us-east-1
-environment:
-  DYNAMODB_TABLE: ${self:service}-${opt:stage, 'dev'}
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, 'dev'}
 
 plugins:
   - serverless-offline
 
 functions:
   scraper:
-    handler: src/handlers/scraper.handler
+    handler: src/services/productsScraper.getProducts
     events:
       - http:
           path: products
