@@ -1,0 +1,31 @@
+service: amazon-scraper
+
+provider:
+name: aws
+runtime: nodejs18.x
+region: us-east-1
+environment:
+  DYNAMODB_TABLE: ${self:service}-${opt:stage, 'dev'}
+
+functions:
+  scraper:
+    handler: src/handlers/scraper.handler
+    events:
+      - http:
+          path: products
+          method: get
+          cors: true
+
+resources:
+  Resources:
+    ScraperTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: productId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
