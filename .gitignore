@@ -1,2 +1,4 @@
 node_modules
+.serverless
+undefined
 package-lock.json
