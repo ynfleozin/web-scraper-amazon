@@ -37,7 +37,8 @@ export async function getProducts(event: APIGatewayProxyEvent) {
         .map((item) => {
           let title =
             item.querySelector(SELECTORS.title[0])?.textContent?.trim() ||
-            item.querySelector(SELECTORS.title[1])?.textContent?.trim();
+            item.querySelector(SELECTORS.title[1])?.textContent?.trim() ||
+            "Título não disponível.";
 
           let price =
             item.querySelector(SELECTORS.price)?.textContent?.trim() ||
