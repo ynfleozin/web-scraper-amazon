@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "aws-sdk": "^2.1692.0",
     "puppeteer": "^24.4.0",
     "serverless": "^4.9.0",
     "typescript": "^5.8.2"

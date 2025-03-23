@@ -6,6 +6,14 @@ provider:
   region: us-east-1
   environment:
     DYNAMODB_TABLE: ${self:service}-${opt:stage, 'dev'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:Scan
+          Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
 
 plugins:
   - serverless-offline
@@ -22,17 +30,24 @@ functions:
           path: products/{category}
           method: GET
           cors: true
+  listProducts:
+    handler: src/services/productsScraper.listProducts
+    events:
+      - http:
+          path: list-products
+          method: GET
+          cors: true
 
-#resources:
-#  Resources:
-#    ScraperTable:
-#      Type: AWS::DynamoDB::Table
-#      Properties:
-#        TableName: ${self:provider.environment.DYNAMODB_TABLE}
-#        AttributeDefinitions:
-#          - AttributeName: productId
-#            AttributeType: S
-#        KeySchema:
-#          - AttributeName: productId
-#            KeyType: HASH
-#        BillingMode: PAY_PER_REQUEST
+resources:
+  Resources:
+    ScraperTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: productId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: productId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
