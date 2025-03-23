@@ -1,35 +1,54 @@
+import { APIGatewayProxyEvent } from "aws-lambda";
 import puppeteer from "puppeteer";
 
-export async function getProducts() {
+export const SELECTORS = {
+  product: ".p13n-sc-uncoverable-faceout",
+  title: [".p13n-sc-truncated", "._cDEzb_p13n-sc-css-line-clamp-3_g3dy1"],
+  price: "._cDEzb_p13n-sc-price_3mJ9Z",
+};
+
+export async function getProducts(event: APIGatewayProxyEvent) {
   let browser;
   try {
-    const url = "https://www.amazon.com.br/gp/bestsellers/";
+    const category = event.pathParameters?.category || "";
+
+    if (category && !/^[a-zA-Z0-9\-]+$/.test(category)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Parâmetros inválidos." }),
+      };
+    }
+
+    const url = `https://www.amazon.com.br/gp/bestsellers/${
+      category ? `${encodeURIComponent(category)}` : ""
+    }`;
 
     browser = await puppeteer.launch();
 
     const page = await browser.newPage();
     await page.goto(url);
 
-    await page.waitForSelector(".p13n-sc-uncoverable-faceout");
-    const products = await page.evaluate(() => {
-      const content = document.querySelectorAll(".p13n-sc-uncoverable-faceout");
+    await page.waitForSelector(SELECTORS.product);
+    const products = await page.evaluate((SELECTORS) => {
+      const content = document.querySelectorAll(SELECTORS.product);
 
       return Array.from(content)
         .slice(0, 3)
         .map((item) => {
-          const title = item
-            .querySelector(".p13n-sc-truncated")
-            ?.textContent?.trim();
-          const price = item
-            .querySelector("._cDEzb_p13n-sc-price_3mJ9Z")
-            ?.textContent?.trim();
+          let title =
+            item.querySelector(SELECTORS.title[0])?.textContent?.trim() ||
+            item.querySelector(SELECTORS.title[1])?.textContent?.trim();
+
+          let price =
+            item.querySelector(SELECTORS.price)?.textContent?.trim() ||
+            "Preço não disponível.";
 
           return {
             title,
             price,
           };
         });
-    });
+    }, SELECTORS);
 
     return {
       statusCode: 200,
@@ -44,8 +63,8 @@ export async function getProducts() {
       headers: { "Content-Type": "application/json" },
     };
   } finally {
-    if(browser) {
-        await browser.close();
+    if (browser) {
+      await browser.close();
     }
   }
 }

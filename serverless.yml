@@ -16,7 +16,11 @@ functions:
     events:
       - http:
           path: products
-          method: get
+          method: GET
+          cors: true
+      - http:
+          path: products/{category}
+          method: GET
           cors: true
 
 #resources:
