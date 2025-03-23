@@ -10,10 +10,10 @@ export const SELECTORS = {
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-export async function getProducts(event: APIGatewayProxyEvent) {
+export async function getProducts(event?: APIGatewayProxyEvent) {
   let browser;
   try {
-    const category = event.pathParameters?.category || "";
+    const category = event?.pathParameters?.category || "";
 
     if (category && !/^[a-zA-Z0-9\-]+$/.test(category)) {
       return {
@@ -26,7 +26,9 @@ export async function getProducts(event: APIGatewayProxyEvent) {
       category ? `${encodeURIComponent(category)}` : ""
     }`;
 
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
 
     const page = await browser.newPage();
     await page.goto(url);
@@ -48,7 +50,7 @@ export async function getProducts(event: APIGatewayProxyEvent) {
             "Preço não disponível.";
 
           return {
-            productId: Math.random().toString(36).substring(2,15),
+            productId: Math.random().toString(36).substring(2, 15),
             title,
             price,
           };
@@ -84,35 +86,5 @@ export async function getProducts(event: APIGatewayProxyEvent) {
     if (browser) {
       await browser.close();
     }
-  }
-}
-
-export async function listProducts() {
-  try {
-    const tableName = process.env.DYNAMODB_TABLE;
-
-
-    if (!tableName) {
-      throw new Error("DYNAMODB_TABLE não está definido no ambiente.");
-    }
-
-    const params = {
-      TableName: tableName, 
-    };
-
-    const result = await dynamoDb.scan(params).promise();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify(result.Items),
-      headers: { "Content-Type": "application/json" },
-    };
-  } catch (error) {
-    console.error("Error:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-      headers: { "Content-Type": "application/json" },
-    };
   }
 }

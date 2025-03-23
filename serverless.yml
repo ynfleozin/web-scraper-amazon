@@ -23,18 +23,18 @@ functions:
     handler: src/services/productsScraper.getProducts
     events:
       - http:
-          path: products
+          path: bestsellers
           method: GET
           cors: true
       - http:
-          path: products/{category}
+          path: bestsellers/{category}
           method: GET
           cors: true
   listProducts:
-    handler: src/services/productsScraper.listProducts
+    handler: src/utils/dynamoDB.listProducts
     events:
       - http:
-          path: list-products
+          path: products
           method: GET
           cors: true
 
