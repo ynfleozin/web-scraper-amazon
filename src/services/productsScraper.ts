@@ -2,7 +2,7 @@ import AWS from "aws-sdk";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import puppeteer from "puppeteer";
 
-export const SELECTORS = {
+const SELECTORS = {
   product: ".p13n-sc-uncoverable-faceout",
   title: [".p13n-sc-truncated", "._cDEzb_p13n-sc-css-line-clamp-3_g3dy1"],
   price: "._cDEzb_p13n-sc-price_3mJ9Z",
